@@ -12,4 +12,9 @@ public class Projectile extends GameObject {
         super(position, DEFAULT_SPRITE);
         velocity = DEFAULT_VEL;
     }
+
+    @Override
+    public void onCollision(GameObject otherObject) {
+        System.out.println("Projectile collided with " + otherObject.getClass().getSimpleName());
+    }
 }

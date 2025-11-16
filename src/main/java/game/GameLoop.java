@@ -12,14 +12,13 @@ public class GameLoop extends AnimationTimer {
     private final GraphicsContext graphicsContext;
     private final Set<KeyCode> keys;
     private final GameWorld gameWorld;
+    private double accumulator = 0;
 
     public GameLoop(GraphicsContext graphicsContext, Set<KeyCode> keys,  GameWorld gameWorld) {
         this.graphicsContext = graphicsContext;
         this.keys = keys;
         this.gameWorld = gameWorld;
     }
-
-    private double accumulator = 0;
 
     @Override
     public void handle(long now) {
@@ -37,9 +36,12 @@ public class GameLoop extends AnimationTimer {
 
         while (accumulator >= FIXED_TIMESTEP) {
             gameWorld.update(FIXED_TIMESTEP, keys);
+            gameWorld.processAddRemoveObjects();
             accumulator -= FIXED_TIMESTEP;
         }
 
+        gameWorld.resolveCollisions();
+        gameWorld.processAddRemoveObjects();
         gameWorld.render(graphicsContext);
     }
 }

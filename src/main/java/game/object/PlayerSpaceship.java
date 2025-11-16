@@ -1,5 +1,6 @@
 package game.object;
 
+import game.GameApp;
 import game.strategy.ShootingStrategy;
 import game.strategy.SingleShotStrategy;
 import javafx.geometry.Point2D;
@@ -9,7 +10,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class PlayerSpaceship extends GameObject {
-    private static final double DEFAULT_MOVE_SPEED = 300;
+    private static final double DEFAULT_MOVE_SPEED = 150;
     private static final double DEFAULT_SHOT_COOLDOWN = .5;
     private static final ShootingStrategy DEFAULT_SHOOTING_STRATEGY = new SingleShotStrategy();
 
@@ -40,6 +41,29 @@ public class PlayerSpaceship extends GameObject {
             attemptShot();
         }
         super.update(deltaTime, keys);
+    }
+
+    @Override
+    protected void checkAndResolveWorldBoundaryCollision() {
+        Point2D currentPosition = getPosition();
+        double currentPositionX = currentPosition.getX();
+        double currentPositionY = currentPosition.getY();
+        if (currentPositionX < 0) {
+            currentPositionX = 0;
+        } else if (currentPositionX > GameApp.WINDOW_WIDTH) {
+            currentPositionX = GameApp.WINDOW_WIDTH;
+        }
+        if (currentPositionY < 0) {
+            currentPositionY = 0;
+        } else if (currentPositionY > GameApp.WINDOW_HEIGHT) {
+            currentPositionY = GameApp.WINDOW_HEIGHT;
+        }
+        position = new Point2D(currentPositionX, currentPositionY);
+    }
+
+    @Override
+    public void onCollision(GameObject otherObject) {
+        System.out.println("Player collided with " + otherObject.getClass().getSimpleName());
     }
 
     private void handleMovement(boolean up, boolean down, boolean left, boolean right) {
