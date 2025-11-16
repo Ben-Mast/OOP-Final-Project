@@ -1,10 +1,7 @@
 package game;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;

@@ -1,5 +1,9 @@
 package game;
 
+import game.object.GameObject;
+import game.object.PlayerSpaceship;
+import game.object.Projectile;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -9,28 +13,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class GameWorld {
-    private final List<GameObject> gameObjects = new ArrayList<GameObject>();
-    private final Spaceship player;
+    private static final Point2D DEFAULT_PLAYER_SPAWN = new Point2D(375, 550);
+
+    private final List<GameObject> gameObjects = new ArrayList<>();
+    private final List<GameObject> objectsToAdd = new ArrayList<>();
+    private final List<GameObject> objectsToRemove = new ArrayList<>();
+
 
     public GameWorld() {
-        player = new Spaceship(0.0,0.0, new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("spaceship.png"))));
+        PlayerSpaceship player = new PlayerSpaceship(DEFAULT_PLAYER_SPAWN, new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("spaceship.png"))), this::createProjectile);
+        gameObjects.add(player);
     }
 
-    public void updatePositions (double deltaTime, Set<KeyCode> keys) {
-
-        player.handleInput(
-                keys.contains(KeyCode.W),
-                keys.contains(KeyCode.S),
-                keys.contains(KeyCode.A),
-                keys.contains(KeyCode.D)
-        );
-        player.updatePosition(deltaTime);
-
+    public void update(double deltaTime, Set<KeyCode> keys) {
         for (GameObject gameObject : gameObjects) {
-            gameObject.updatePosition(deltaTime);
+            gameObject.update(deltaTime, keys);
         }
+
+        gameObjects.removeAll(objectsToRemove);
+        gameObjects.addAll(objectsToAdd);
+
+        objectsToRemove.clear();
+        objectsToAdd.clear();
     }
 
     public void render(GraphicsContext graphicsContext) {
@@ -38,10 +45,12 @@ public class GameWorld {
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillRect(0, 0, GameApp.WINDOW_WIDTH, GameApp.WINDOW_HEIGHT);
 
-        player.render(graphicsContext);
-
         for (GameObject gameObject : gameObjects) {
             gameObject.render(graphicsContext);
         }
+    }
+
+    private void createProjectile(GameObject projectile) {
+        objectsToAdd.add(projectile);
     }
 }

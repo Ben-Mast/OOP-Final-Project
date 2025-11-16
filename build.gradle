@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.14'
 }
 
 group = 'org.example'
@@ -10,25 +11,45 @@ repositories {
     mavenCentral()
 }
 
+javafx {
+    version = "21"
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
+}
+
 dependencies {
-    def javafxVersion = '22'
-    def javafxPlatform = org.gradle.internal.os.OperatingSystem.current().isWindows() ? 'win' :
-            org.gradle.internal.os.OperatingSystem.current().isMacOsX() ? 'mac' : 'linux'
-
-    implementation "org.openjfx:javafx-base:${javafxVersion}:${javafxPlatform}"
-    implementation "org.openjfx:javafx-controls:${javafxVersion}:${javafxPlatform}"
-    implementation "org.openjfx:javafx-graphics:${javafxVersion}:${javafxPlatform}"
-
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+configurations {
+    javafxSdk
+}
+
+dependencies {
+    def v = "21"
+    def platform = org.gradle.internal.os.OperatingSystem.current().isWindows() ? "win" :
+            org.gradle.internal.os.OperatingSystem.current().isMacOsX() ? "mac" : "linux"
+
+    javafxSdk "org.openjfx:javafx-base:${v}:${platform}"
+    javafxSdk "org.openjfx:javafx-controls:${v}:${platform}"
+    javafxSdk "org.openjfx:javafx-graphics:${v}:${platform}"
+    javafxSdk "org.openjfx:javafx-fxml:${v}:${platform}"
+}
+
+tasks.register("unpackJavaFX", Copy) {
+    from(configurations["javafxSdk"])
+    into(layout.buildDirectory.dir("javafx-sdk"))
+}
+
+tasks.named("compileJava") {
+    dependsOn("unpackJavaFX")
+}
+
 application {
     mainClass = 'game.GameApp'
     applicationDefaultJvmArgs = [
-            "--module-path", project.configurations.runtimeClasspath.asPath,
-            "--add-modules", "javafx.controls,javafx.graphics,javafx.base"
+            '--enable-native-access=javafx.graphics'
     ]
 }
 
