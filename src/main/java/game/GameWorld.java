@@ -1,6 +1,8 @@
 package game;
 
+import game.object.Asteroid;
 import game.object.GameObject;
+import game.object.GameObjectFactory;
 import game.object.PlayerSpaceship;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -8,17 +10,19 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class GameWorld {
     private static final Point2D DEFAULT_PLAYER_SPAWN = new Point2D(375, 550);
+    private static final GameObjectFactory gameObjectFactory = new GameObjectFactory();
 
     private final List<GameObject> gameObjects = new ArrayList<>();
     private final List<GameObject> objectsToAdd = new ArrayList<>();
     private final List<GameObject> objectsToRemove = new ArrayList<>();
+
+    private final double timeBetweenWaves = 2;
+    private double waveCooldownTimer = 0;
+    private int waveSize = 5;
 
 
     public GameWorld() {
@@ -27,6 +31,7 @@ public class GameWorld {
     }
 
     public void update(double deltaTime, Set<KeyCode> keys) {
+        attemptToSpawnWave(deltaTime);
         for (GameObject gameObject : gameObjects) {
             gameObject.update(deltaTime, keys);
         }
@@ -54,8 +59,24 @@ public class GameWorld {
         gameObject.setGameObjectDestroyer(this::removeGameObject);
     }
 
+    private void createGameObjects(List<GameObject> gameObjects) {
+        for (GameObject gameObject : gameObjects) {
+            createGameObject(gameObject);
+        }
+    }
+
     private void removeGameObject(GameObject gameObject) {
         objectsToRemove.add(gameObject);
+    }
+
+    private void attemptToSpawnWave(double deltaTime) {
+        if (waveCooldownTimer > 0) {
+            waveCooldownTimer-= deltaTime;
+        } else {
+            waveCooldownTimer =  timeBetweenWaves;
+            List<GameObject> asteroids = gameObjectFactory.createNRandomlySpawnedAsteroids(waveSize);
+            createGameObjects(asteroids);
+        }
     }
 
     public void resolveCollisions() {

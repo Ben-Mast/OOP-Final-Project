@@ -27,7 +27,7 @@ public abstract class GameObject {
         this.gameObjectDestroyer = gameObjectDestroyer;
     }
 
-    public abstract void onCollision(GameObject otherObject);
+    public void onCollision(GameObject otherObject) {};
 
     public double getWidth() {
         return sprite.getWidth();

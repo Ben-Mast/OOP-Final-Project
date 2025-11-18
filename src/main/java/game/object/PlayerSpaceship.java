@@ -14,18 +14,18 @@ public class PlayerSpaceship extends GameObject {
     private static final double DEFAULT_SHOT_COOLDOWN = .5;
     private static final ShootingStrategy DEFAULT_SHOOTING_STRATEGY = new SingleShotStrategy();
 
-    private final Consumer<Projectile> projectileCreatorFunction;
+    private final Consumer<GameObject> gameObjectCreatorFunction;
     private ShootingStrategy shootingStrategy;
     private double shotCooldown;
     private double shotCooldownTimer = 0;
     private double moveSpeed;
 
-    public PlayerSpaceship(Point2D position, Image sprite, Consumer<Projectile> projectileCreatorFunction) {
+    public PlayerSpaceship(Point2D position, Image sprite, Consumer<GameObject> gameObjectCreatorFunction) {
         super(position, sprite);
         moveSpeed = DEFAULT_MOVE_SPEED;
         shotCooldown = DEFAULT_SHOT_COOLDOWN;
         shootingStrategy = DEFAULT_SHOOTING_STRATEGY;
-        this.projectileCreatorFunction = projectileCreatorFunction;
+        this.gameObjectCreatorFunction = gameObjectCreatorFunction;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class PlayerSpaceship extends GameObject {
     private void attemptShot() {
         if (shotCooldownTimer == 0) {
             shotCooldownTimer = shotCooldown;
-            shootingStrategy.shoot(this, projectileCreatorFunction);
+            shootingStrategy.shoot(this, gameObjectCreatorFunction);
         }
     }
 

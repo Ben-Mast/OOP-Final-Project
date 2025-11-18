@@ -15,6 +15,6 @@ public class Projectile extends GameObject {
 
     @Override
     public void onCollision(GameObject otherObject) {
-        System.out.println("Projectile collided with " + otherObject.getClass().getSimpleName());
+        gameObjectDestroyer.accept(this);
     }
 }
