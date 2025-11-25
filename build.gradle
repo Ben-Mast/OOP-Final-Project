@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.14'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'org.example'
@@ -13,37 +13,16 @@ repositories {
 
 javafx {
     version = "21"
-    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
+    modules = [
+            'javafx.controls',
+            'javafx.fxml'
+    ]
 }
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-configurations {
-    javafxSdk
-}
-
-dependencies {
-    def v = "21"
-    def platform = org.gradle.internal.os.OperatingSystem.current().isWindows() ? "win" :
-            org.gradle.internal.os.OperatingSystem.current().isMacOsX() ? "mac" : "linux"
-
-    javafxSdk "org.openjfx:javafx-base:${v}:${platform}"
-    javafxSdk "org.openjfx:javafx-controls:${v}:${platform}"
-    javafxSdk "org.openjfx:javafx-graphics:${v}:${platform}"
-    javafxSdk "org.openjfx:javafx-fxml:${v}:${platform}"
-}
-
-tasks.register("unpackJavaFX", Copy) {
-    from(configurations["javafxSdk"])
-    into(layout.buildDirectory.dir("javafx-sdk"))
-}
-
-tasks.named("compileJava") {
-    dependsOn("unpackJavaFX")
 }
 
 application {

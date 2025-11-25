@@ -1,6 +1,5 @@
 package game;
 
-import game.object.Asteroid;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
 import game.object.PlayerSpaceship;
@@ -22,7 +21,7 @@ public class GameWorld {
 
     private final double timeBetweenWaves = 2;
     private double waveCooldownTimer = 0;
-    private int waveSize = 5;
+    private int waveSize = 2;
 
 
     public GameWorld() {

@@ -63,7 +63,13 @@ public class PlayerSpaceship extends GameObject {
 
     @Override
     public void onCollision(GameObject otherObject) {
-        System.out.println("Player collided with " + otherObject.getClass().getSimpleName());
+        if (invincibilityCooldown > 0) return;
+        invincibilityCooldown = invincibilityTime;
+
+        switch(otherObject.getClass().getSimpleName()) {
+            case "Asteroid":
+                handleCollisionWithKnockback(otherObject);
+        }
     }
 
     private void handleMovement(boolean up, boolean down, boolean left, boolean right) {

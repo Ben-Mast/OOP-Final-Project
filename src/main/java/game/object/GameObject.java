@@ -11,23 +11,40 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public abstract class GameObject {
+    public static final double DEFAULT_INVINCIBILITY_TIME = .3;
+    private static final double COLLISION_KNOCKBACK = 2;
+
     protected double hitRadius;
+    protected double invincibilityTime;
     protected Point2D position;
     protected Point2D velocity;
     protected final Image sprite;
     protected Consumer<GameObject> gameObjectDestroyer;
 
+    protected double invincibilityCooldown = 0;
+
     public GameObject(Point2D position, Image sprite) {
         this.position = position;
         this.sprite = sprite;
         this.hitRadius = sprite.getWidth() / 2 * 0.3;
+        this.invincibilityTime = DEFAULT_INVINCIBILITY_TIME;
     }
 
     public void setGameObjectDestroyer(Consumer<GameObject> gameObjectDestroyer) {
         this.gameObjectDestroyer = gameObjectDestroyer;
     }
 
-    public void onCollision(GameObject otherObject) {};
+    public void onCollision(GameObject otherObject) {
+
+    }
+
+    protected void handleCollisionWithKnockback(GameObject otherObject) {
+        Point2D otherObjectPosition = otherObject.getPosition();
+        Point2D myPosition = getPosition();
+
+        Point2D deflectionVector = myPosition.subtract(otherObjectPosition);
+        position = myPosition.add(deflectionVector.multiply(COLLISION_KNOCKBACK));
+    }
 
     public double getWidth() {
         return sprite.getWidth();
@@ -46,6 +63,7 @@ public abstract class GameObject {
     }
 
     public void update(double deltaTime, Set<KeyCode> keys) {
+        invincibilityCooldown -= deltaTime;
         position = position.add(velocity.multiply(deltaTime));
         checkAndResolveWorldBoundaryCollision();
     }
