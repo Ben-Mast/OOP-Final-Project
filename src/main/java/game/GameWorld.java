@@ -2,10 +2,9 @@ package game;
 
 import game.object.GameObject;
 import game.object.GameObjectFactory;
-import game.object.PlayerSpaceship;
+import game.object.ship.PlayerShip;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
@@ -13,24 +12,28 @@ import java.util.*;
 
 public class GameWorld {
     private static final Point2D DEFAULT_PLAYER_SPAWN = new Point2D(375, 550);
-    private static final GameObjectFactory gameObjectFactory = new GameObjectFactory();
 
     private final List<GameObject> gameObjects = new ArrayList<>();
     private final List<GameObject> objectsToAdd = new ArrayList<>();
     private final List<GameObject> objectsToRemove = new ArrayList<>();
 
-    private final double timeBetweenWaves = 2;
-    private double waveCooldownTimer = 0;
-    private int waveSize = 2;
+    private final double timeBetweenMeteorWaves = 2;
+    private double meteorWaveCooldownTimer = 0;
+    private int meteorWaveSize = 1;
+
+    private final double timeBetweenAIShipWaves = 8;
+    private double shipWaveCooldownTimer = 0;
+    private int shipWaveSize = 1;
 
 
     public GameWorld() {
-        PlayerSpaceship player = new PlayerSpaceship(DEFAULT_PLAYER_SPAWN, new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("spaceship.png"))), this::createGameObject);
+        GameObject player = new PlayerShip(DEFAULT_PLAYER_SPAWN, this::createGameObject);
         createGameObject(player);
     }
 
     public void update(double deltaTime, Set<KeyCode> keys) {
-        attemptToSpawnWave(deltaTime);
+        attemptToSpawnMeteorWave(deltaTime);
+        attemptToSpawnAIShipWave(deltaTime);
         for (GameObject gameObject : gameObjects) {
             gameObject.update(deltaTime, keys);
         }
@@ -68,13 +71,23 @@ public class GameWorld {
         objectsToRemove.add(gameObject);
     }
 
-    private void attemptToSpawnWave(double deltaTime) {
-        if (waveCooldownTimer > 0) {
-            waveCooldownTimer-= deltaTime;
+    private void attemptToSpawnMeteorWave(double deltaTime) {
+        if (meteorWaveCooldownTimer > 0) {
+            meteorWaveCooldownTimer-= deltaTime;
         } else {
-            waveCooldownTimer =  timeBetweenWaves;
-            List<GameObject> asteroids = gameObjectFactory.createNRandomlySpawnedAsteroids(waveSize);
+            meteorWaveCooldownTimer = timeBetweenMeteorWaves;
+            List<GameObject> asteroids = GameObjectFactory.createNRandomlySpawnedAsteroids(meteorWaveSize, this::createGameObject);
             createGameObjects(asteroids);
+        }
+    }
+
+    private void attemptToSpawnAIShipWave(double deltaTime) {
+        if (shipWaveCooldownTimer > 0) {
+            shipWaveCooldownTimer-= deltaTime;
+        }  else {
+            shipWaveCooldownTimer = timeBetweenAIShipWaves;
+            List<GameObject> ships = GameObjectFactory.createNRandomlySpawnedAIShips(shipWaveSize, this::createGameObject);
+            createGameObjects(ships);
         }
     }
 

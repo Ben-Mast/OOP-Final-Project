@@ -1,31 +1,25 @@
-package game.object;
+package game.object.ship;
 
 import game.GameApp;
-import game.strategy.ShootingStrategy;
-import game.strategy.SingleShotStrategy;
+import game.object.GameObject;
+import game.object.GameObjectFactory;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class PlayerSpaceship extends GameObject {
-    private static final double DEFAULT_MOVE_SPEED = 150;
-    private static final double DEFAULT_SHOT_COOLDOWN = .5;
-    private static final ShootingStrategy DEFAULT_SHOOTING_STRATEGY = new SingleShotStrategy();
+public class PlayerShip extends Ship {
+    protected static final double DEFAULT_MOVE_SPEED = 150;
+    protected static final double DEFAULT_SHOT_COOLDOWN = 1;
+    private static final Image DEFAULT_SPRITE = new Image(Objects.requireNonNull(PlayerShip.class.getClassLoader().getResourceAsStream("player_ship.png")));
 
-    private final Consumer<GameObject> gameObjectCreatorFunction;
-    private ShootingStrategy shootingStrategy;
-    private double shotCooldown;
-    private double shotCooldownTimer = 0;
-    private double moveSpeed;
-
-    public PlayerSpaceship(Point2D position, Image sprite, Consumer<GameObject> gameObjectCreatorFunction) {
-        super(position, sprite);
+    public PlayerShip(Point2D position, Consumer<GameObject> gameObjectCreatorFunction) {
+        super(position, DEFAULT_SPRITE, gameObjectCreatorFunction);
         moveSpeed = DEFAULT_MOVE_SPEED;
         shotCooldown = DEFAULT_SHOT_COOLDOWN;
-        shootingStrategy = DEFAULT_SHOOTING_STRATEGY;
-        this.gameObjectCreatorFunction = gameObjectCreatorFunction;
     }
 
     @Override
@@ -72,6 +66,13 @@ public class PlayerSpaceship extends GameObject {
         }
     }
 
+    private void attemptShot() {
+        if (shotCooldownTimer == 0) {
+            shotCooldownTimer = shotCooldown;
+            gameObjectCreatorFunction.accept(GameObjectFactory.createFriendlyProjectile(getPosition().subtract(0,getHeight()/2)));
+        }
+    }
+
     private void handleMovement(boolean up, boolean down, boolean left, boolean right) {
         double x = 0;
         double y = 0;
@@ -85,13 +86,6 @@ public class PlayerSpaceship extends GameObject {
 
         if (velocity.magnitude() > 0) {
             velocity = velocity.normalize().multiply(moveSpeed);
-        }
-    }
-
-    private void attemptShot() {
-        if (shotCooldownTimer == 0) {
-            shotCooldownTimer = shotCooldown;
-            shootingStrategy.shoot(this, gameObjectCreatorFunction);
         }
     }
 

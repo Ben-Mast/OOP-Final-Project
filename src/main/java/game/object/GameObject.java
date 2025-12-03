@@ -55,7 +55,11 @@ public abstract class GameObject {
     }
 
     public Point2D getPosition() {
-        return new Point2D(position.getX(), position.getY());
+        return position;
+    }
+
+    public Point2D getVelocity() {
+        return velocity;
     }
 
     public double getHitRadius() {
