@@ -28,7 +28,7 @@ public abstract class Asteroid extends GameObject {
         if (currentPositionX < 0 ||  currentPositionX > GameApp.WINDOW_WIDTH) {
             newVelocityX = -newVelocityX;
         }
-        if (currentPositionY < 0 ||  currentPositionY > GameApp.WINDOW_WIDTH) {
+        if (currentPositionY < 0 ||  currentPositionY > GameApp.WINDOW_HEIGHT) {
             newVelocityY = -newVelocityY;
         }
         velocity = new Point2D(newVelocityX, newVelocityY);
