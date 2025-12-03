@@ -39,7 +39,10 @@ public abstract class Asteroid extends GameObject {
         String otherObjectType = otherObject.getClass().getSimpleName();
 
         switch (otherObjectType) {
-            case "FriendlyProjectile", "EnemyProjectile":
+            case "FriendlyProjectile":
+                gameObjectDestroyer.accept(this);
+                break;
+            case "EnemyProjectile":
                 gameObjectDestroyer.accept(this);
                 break;
         }
