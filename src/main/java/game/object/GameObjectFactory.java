@@ -96,9 +96,10 @@ public class GameObjectFactory {
 
     public static GameObject createRandomlySpawnedAIShip(Consumer<GameObject> gameObjectCreatorFunction) {
         Point2D randomSpawnPoint = getRandomTopScreenSpawnPosition();
-        AIShip ship = AIShip.getNewBuilder(gameObjectCreatorFunction).givePosition(randomSpawnPoint).build();
-        ship.setMovementStrategy(createAIMovementStrategy(AIMovementType.getRandom(),ship));
-        return ship;
+        return AIShip.getNewBuilder(gameObjectCreatorFunction)
+                .givePosition(randomSpawnPoint)
+                .giveMovementStrategy(AIMovementType.getRandom())
+                .build();
     }
 
     public static List<GameObject> createNRandomlySpawnedAIShips(int numberOfShips, Consumer<GameObject> gameObjectCreatorFunction) {

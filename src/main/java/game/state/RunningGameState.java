@@ -1,4 +1,4 @@
-package game.states;
+package game.state;
 
 import game.GameWorld;
 import javafx.scene.canvas.GraphicsContext;

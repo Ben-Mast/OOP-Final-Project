@@ -34,13 +34,17 @@ public abstract class Asteroid extends GameObject {
         setVelocity(new Point2D(newVelocityX, newVelocityY));
     }
 
+    protected void handleHitByProjectile() {
+        getGameObjectDestroyer().accept(this);
+    }
+
     @Override
     public void onCollision(GameObject otherObject) {
         String otherObjectType = otherObject.getClass().getSimpleName();
 
         switch (otherObjectType) {
             case "FriendlyProjectile", "EnemyProjectile":
-                getGameObjectDestroyer().accept(this);
+                handleHitByProjectile();
                 break;
         }
     }

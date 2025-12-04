@@ -22,7 +22,8 @@ javafx {
     modules = [
             'javafx.controls',
             'javafx.fxml',
-            'javafx.graphics'
+            'javafx.graphics',
+            'javafx.swing'
     ]
 }
 

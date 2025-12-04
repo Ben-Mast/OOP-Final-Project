@@ -21,8 +21,7 @@ public abstract class Ship extends GameObject {
         setGameObjectCreator(gameObjectCreator);
     }
 
-    protected void attemptShot() {
-    }
+    abstract void attemptShot();
 
     protected void handleDeath() {
         getGameObjectDestroyer().accept(this);
@@ -31,6 +30,7 @@ public abstract class Ship extends GameObject {
     public void takeDamage(double damage) {
         double newHealth = getHealth() - damage;
         if (newHealth <= 0) {
+            setHealth(0);
             handleDeath();
         } else {
             setHealth(newHealth);

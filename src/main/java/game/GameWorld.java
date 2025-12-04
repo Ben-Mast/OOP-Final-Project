@@ -4,7 +4,7 @@ import game.object.GameObject;
 import game.object.GameObjectFactory;
 import game.object.ship.PlayerShip;
 import game.object.ship.Ship;
-import game.states.*;
+import game.state.*;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
@@ -42,6 +42,7 @@ public class GameWorld {
         gameObjects.clear();
         Ship player = new PlayerShip(DEFAULT_PLAYER_SPAWN, this::createGameObject);
         createGameObject(player);
+        processAddRemoveObjects();
         gameState = runningGameState;
     }
 
@@ -97,7 +98,7 @@ public class GameWorld {
         }
     }
 
-    private void createGameObject(GameObject gameObject) {
+    protected void createGameObject(GameObject gameObject) {
         objectsToAdd.add(gameObject);
         gameObject.setGameObjectDestroyer(this::removeGameObject);
     }
@@ -108,7 +109,7 @@ public class GameWorld {
         }
     }
 
-    private void removeGameObject(GameObject gameObject) {
+    protected void removeGameObject(GameObject gameObject) {
         objectsToRemove.add(gameObject);
     }
 
@@ -133,6 +134,7 @@ public class GameWorld {
     }
 
     public void resolveCollisions() {
+        processAddRemoveObjects();
         for (int i = 0; i < gameObjects.size(); i++) {
             for (int j = i + 1; j < gameObjects.size(); j++) {
                 GameObject gameObject1 = gameObjects.get(i);

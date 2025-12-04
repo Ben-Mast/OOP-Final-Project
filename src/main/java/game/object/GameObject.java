@@ -96,9 +96,7 @@ public abstract class GameObject {
         return sprite.getHeight();
     }
 
-    public void onCollision(GameObject otherObject) {
-        // default behavior is no-op
-    }
+    public abstract void onCollision(GameObject otherObject);
 
     protected void handleCollisionWithKnockback(GameObject otherObject) {
         Point2D otherPos = otherObject.getPosition();
@@ -140,6 +138,9 @@ public abstract class GameObject {
         );
     }
 
+    /* COMMENTED FOR TEST COVERAGE, UNCOMMENT FOR DEBUGGING USE */
+
+    /*
     private void drawHitbox(GraphicsContext gc) {
         gc.setFill(Color.RED);
         gc.fillOval(
@@ -149,4 +150,5 @@ public abstract class GameObject {
                 getHitRadius() * 2
         );
     }
+    */
 }

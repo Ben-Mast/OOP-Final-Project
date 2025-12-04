@@ -18,17 +18,11 @@ public class BigAsteroid extends Asteroid {
     }
 
     @Override
-    public void onCollision(GameObject otherObject) {
-        String otherObjectType = otherObject.getClass().getSimpleName();
-
-        switch (otherObjectType) {
-            case "FriendlyProjectile", "EnemyProjectile":
-                List<GameObject> asteroidsToCreateOnDestruction = GameObjectFactory.createNPreciselySpawnedAsteroids(AsteroidSize.MEDIUM, 2, getPosition(), gameObjectCreator);
-                for  (GameObject asteroid : asteroidsToCreateOnDestruction) {
-                    getGameObjectCreator().accept(asteroid);
-                }
-                getGameObjectDestroyer().accept(this);
-                break;
+    protected void handleHitByProjectile() {
+        List<GameObject> asteroidsToCreateOnDestruction = GameObjectFactory.createNPreciselySpawnedAsteroids(AsteroidSize.MEDIUM, 2, getPosition(), gameObjectCreator);
+        for  (GameObject asteroid : asteroidsToCreateOnDestruction) {
+            getGameObjectCreator().accept(asteroid);
         }
+        super.handleHitByProjectile();
     }
 }

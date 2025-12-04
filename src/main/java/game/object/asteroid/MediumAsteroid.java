@@ -7,7 +7,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class MediumAsteroid extends Asteroid {
@@ -18,17 +17,11 @@ public class MediumAsteroid extends Asteroid {
     }
 
     @Override
-    public void onCollision(GameObject otherObject) {
-        String otherObjectType = otherObject.getClass().getSimpleName();
-
-        switch (otherObjectType) {
-            case "FriendlyProjectile", "EnemyProjectile":
-                List<GameObject> asteroidsToCreateOnDestruction = GameObjectFactory.createNPreciselySpawnedAsteroids(AsteroidSize.SMALL, 3, getPosition(), gameObjectCreator);
-                for  (GameObject asteroid : asteroidsToCreateOnDestruction) {
-                    getGameObjectCreator().accept(asteroid);
-                }
-                getGameObjectDestroyer().accept(this);
-                break;
+    protected void handleHitByProjectile() {
+        List<GameObject> asteroidsToCreateOnDestruction = GameObjectFactory.createNPreciselySpawnedAsteroids(AsteroidSize.SMALL, 3, getPosition(), gameObjectCreator);
+        for  (GameObject asteroid : asteroidsToCreateOnDestruction) {
+            getGameObjectCreator().accept(asteroid);
         }
+        super.handleHitByProjectile();
     }
 }
