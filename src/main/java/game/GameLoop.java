@@ -36,12 +36,10 @@ public class GameLoop extends AnimationTimer {
 
         while (accumulator >= FIXED_TIMESTEP) {
             gameWorld.update(FIXED_TIMESTEP, keys);
-            gameWorld.processAddRemoveObjects();
+            gameWorld.resolveCollisions();
             accumulator -= FIXED_TIMESTEP;
         }
 
-        gameWorld.resolveCollisions();
-        gameWorld.processAddRemoveObjects();
         gameWorld.render(graphicsContext);
     }
 }

@@ -4,6 +4,7 @@ import game.GameApp;
 import game.ResourceManager;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
+import game.object.projectile.Projectile;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -15,18 +16,15 @@ public class PlayerShip extends Ship {
 
     private static final double DEFAULT_MOVE_SPEED = 150;
     private static final double DEFAULT_SHOT_COOLDOWN = 1;
-    private static final Image DEFAULT_SPRITE =
-            ResourceManager.getInstance().getPlayerShipSprite();
+    private static final double DEFAULT_HEALTH = 20;
+    private static final Image DEFAULT_SPRITE = ResourceManager.getInstance().getPlayerShipSprite();
 
     public PlayerShip(Point2D position, Consumer<GameObject> gameObjectCreatorFunction) {
-        super(position, DEFAULT_SPRITE, gameObjectCreatorFunction);
-        setMoveSpeed(DEFAULT_MOVE_SPEED);
-        setShotCooldown(DEFAULT_SHOT_COOLDOWN);
+        super(position, DEFAULT_SPRITE, gameObjectCreatorFunction, DEFAULT_HEALTH, DEFAULT_MOVE_SPEED, DEFAULT_SHOT_COOLDOWN);
     }
 
     @Override
     public void update(double deltaTime, Set<KeyCode> keys) {
-        // update cooldown timer
         if (getShotCooldownTimer() > 0) {
             setShotCooldownTimer(Math.max(0, getShotCooldownTimer() - deltaTime));
         }
@@ -66,20 +64,21 @@ public class PlayerShip extends Ship {
         setInvincibilityCooldown(getInvincibilityTime());
 
         switch (otherObject.getClass().getSimpleName()) {
-            case "BigAsteroid", "MediumAsteroid", "SmallAsteroid" ->
-                    handleCollisionWithKnockback(otherObject);
+            case "BigAsteroid", "MediumAsteroid", "SmallAsteroid", "AIShip":
+                handleCollisionWithKnockback(otherObject);
+                break;
+            case "EnemyProjectile":
+                Projectile  projectile = (Projectile) otherObject;
+                takeDamage(projectile.getDamage());
+                break;
         }
     }
 
-
-    public void attemptShot() {
+    @Override
+    protected void attemptShot() {
         if (getShotCooldownTimer() == 0) {
             setShotCooldownTimer(getShotCooldown());
-            getGameObjectCreator().accept(
-                    GameObjectFactory.createFriendlyProjectile(
-                            getPosition().subtract(0, getHeight() / 2)
-                    )
-            );
+            getGameObjectCreator().accept(GameObjectFactory.createFriendlyProjectile(getPosition().subtract(0, getHeight() / 2)));
         }
     }
 

@@ -25,7 +25,7 @@ public class MediumAsteroid extends Asteroid {
             case "FriendlyProjectile", "EnemyProjectile":
                 List<GameObject> asteroidsToCreateOnDestruction = GameObjectFactory.createNPreciselySpawnedAsteroids(AsteroidSize.SMALL, 3, getPosition(), gameObjectCreator);
                 for  (GameObject asteroid : asteroidsToCreateOnDestruction) {
-                    gameObjectCreator.accept(asteroid);
+                    getGameObjectCreator().accept(asteroid);
                 }
                 getGameObjectDestroyer().accept(this);
                 break;

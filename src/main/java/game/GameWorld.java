@@ -4,10 +4,7 @@ import game.object.GameObject;
 import game.object.GameObjectFactory;
 import game.object.ship.PlayerShip;
 import game.object.ship.Ship;
-import game.states.GameState;
-import game.states.PausedGameState;
-import game.states.RunningGameState;
-import game.states.State;
+import game.states.*;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
@@ -22,6 +19,7 @@ public class GameWorld {
 
     private final GameState runningGameState = new RunningGameState(this);
     private final GameState pausedGameState = new PausedGameState(this);
+    private final GameState gameOverGameState = new GameOverState(this);
 
     private final List<GameObject> gameObjects = new ArrayList<>();
     private final List<GameObject> objectsToAdd = new ArrayList<>();
@@ -37,6 +35,11 @@ public class GameWorld {
 
 
     public GameWorld() {
+        reset();
+    }
+
+    public void reset() {
+        gameObjects.clear();
         Ship player = new PlayerShip(DEFAULT_PLAYER_SPAWN, this::createGameObject);
         createGameObject(player);
         gameState = runningGameState;
@@ -46,7 +49,12 @@ public class GameWorld {
         gameState = switch (newState) {
             case RUNNING -> runningGameState;
             case PAUSED -> pausedGameState;
+            case GAMEOVER -> gameOverGameState;
         };
+    }
+
+    public boolean isGameOver() {
+        return gameObjects.stream().noneMatch(gameObject -> gameObject instanceof PlayerShip);
     }
 
     public void update(double deltaTime, Set<KeyCode> keyCodes) {
@@ -58,11 +66,18 @@ public class GameWorld {
     }
 
     public void updateWorld(double deltaTime, Set<KeyCode> keys) {
+        processAddRemoveObjects();
+
+        if (isGameOver()) {
+            updateGameState(State.GAMEOVER);
+        }
         attemptToSpawnMeteorWave(deltaTime);
         attemptToSpawnAIShipWave(deltaTime);
         for (GameObject gameObject : gameObjects) {
             gameObject.update(deltaTime, keys);
         }
+
+        processAddRemoveObjects();
     }
 
     public void processAddRemoveObjects() {
@@ -128,6 +143,7 @@ public class GameWorld {
                 }
             }
         }
+        processAddRemoveObjects();
     }
 
     private boolean isColliding(GameObject gameObject1, GameObject gameObject2) {

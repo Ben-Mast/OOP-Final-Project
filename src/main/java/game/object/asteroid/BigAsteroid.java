@@ -7,7 +7,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class BigAsteroid extends Asteroid {
@@ -26,7 +25,7 @@ public class BigAsteroid extends Asteroid {
             case "FriendlyProjectile", "EnemyProjectile":
                 List<GameObject> asteroidsToCreateOnDestruction = GameObjectFactory.createNPreciselySpawnedAsteroids(AsteroidSize.MEDIUM, 2, getPosition(), gameObjectCreator);
                 for  (GameObject asteroid : asteroidsToCreateOnDestruction) {
-                    gameObjectCreator.accept(asteroid);
+                    getGameObjectCreator().accept(asteroid);
                 }
                 getGameObjectDestroyer().accept(this);
                 break;

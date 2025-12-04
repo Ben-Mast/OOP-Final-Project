@@ -4,6 +4,8 @@ import game.GameApp;
 import game.ResourceManager;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
+import game.object.projectile.FriendlyProjectile;
+import game.object.projectile.Projectile;
 import game.strategy.AIMovementStrategy;
 import game.strategy.DefaultAIMovement;
 import javafx.geometry.Point2D;
@@ -14,15 +16,14 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class AIShip extends Ship {
-    protected static final double DEFAULT_MOVE_SPEED = 50;
-    protected static final double DEFAULT_SHOT_COOLDOWN = 1;
+    private static final double DEFAULT_MOVE_SPEED = 50;
+    private static final double DEFAULT_SHOT_COOLDOWN = 1;
+    private static final double DEFAULT_HEALTH = 10;
     private static final Image DEFAULT_SPRITE = ResourceManager.getInstance().getEnemyShipSprite();
     private AIMovementStrategy movementStrategy;
 
     public AIShip (Point2D position, Consumer<GameObject> gameObjectCreatorFunction) {
-        super(position, DEFAULT_SPRITE, gameObjectCreatorFunction);
-        setMoveSpeed(DEFAULT_MOVE_SPEED);
-        setShotCooldown(DEFAULT_SHOT_COOLDOWN);
+        super(position, DEFAULT_SPRITE, gameObjectCreatorFunction, DEFAULT_HEALTH, DEFAULT_MOVE_SPEED, DEFAULT_SHOT_COOLDOWN);
         setMovementStrategy(new DefaultAIMovement(this));
     }
 
@@ -62,6 +63,16 @@ public class AIShip extends Ship {
         if (shotCooldownTimer == 0) {
             shotCooldownTimer = shotCooldown;
             gameObjectCreator.accept(GameObjectFactory.createEnemyProjectile(getPosition().add(0,getHeight()/2)));
+        }
+    }
+
+    @Override
+    public void onCollision(GameObject otherObject) {
+        switch (otherObject.getClass().getSimpleName()) {
+            case "FriendlyProjectile":
+                Projectile projectile = (Projectile) otherObject;
+                takeDamage(projectile.getDamage());
+                break;
         }
     }
 

@@ -44,4 +44,8 @@ public abstract class Asteroid extends GameObject {
                 break;
         }
     }
+
+    public Consumer<GameObject> getGameObjectCreator() {
+        return gameObjectCreator;
+    }
 }
