@@ -1,92 +1,104 @@
 package game.object.ship;
 
 import game.GameApp;
+import game.ResourceManager;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
 public class PlayerShip extends Ship {
-    protected static final double DEFAULT_MOVE_SPEED = 150;
-    protected static final double DEFAULT_SHOT_COOLDOWN = 1;
-    private static final Image DEFAULT_SPRITE = new Image(Objects.requireNonNull(PlayerShip.class.getClassLoader().getResourceAsStream("player_ship.png")));
+
+    private static final double DEFAULT_MOVE_SPEED = 150;
+    private static final double DEFAULT_SHOT_COOLDOWN = 1;
+    private static final Image DEFAULT_SPRITE =
+            ResourceManager.getInstance().getPlayerShipSprite();
 
     public PlayerShip(Point2D position, Consumer<GameObject> gameObjectCreatorFunction) {
         super(position, DEFAULT_SPRITE, gameObjectCreatorFunction);
-        moveSpeed = DEFAULT_MOVE_SPEED;
-        shotCooldown = DEFAULT_SHOT_COOLDOWN;
+        setMoveSpeed(DEFAULT_MOVE_SPEED);
+        setShotCooldown(DEFAULT_SHOT_COOLDOWN);
     }
 
     @Override
-    public void update(double deltaTime,  Set<KeyCode> keys) {
-        shotCooldownTimer = shotCooldownTimer > 0 ? shotCooldownTimer - deltaTime : 0;
+    public void update(double deltaTime, Set<KeyCode> keys) {
+        // update cooldown timer
+        if (getShotCooldownTimer() > 0) {
+            setShotCooldownTimer(Math.max(0, getShotCooldownTimer() - deltaTime));
+        }
+
         handleMovement(
-            keys.contains(KeyCode.W),
-            keys.contains(KeyCode.S),
-            keys.contains(KeyCode.A),
-            keys.contains(KeyCode.D)
+                keys.contains(KeyCode.W),
+                keys.contains(KeyCode.S),
+                keys.contains(KeyCode.A),
+                keys.contains(KeyCode.D)
         );
+
         if (keys.contains(KeyCode.SPACE)) {
             attemptShot();
         }
+
         super.update(deltaTime, keys);
     }
 
     @Override
     protected void checkAndResolveWorldBoundaryCollision() {
-        Point2D currentPosition = getPosition();
-        double currentPositionX = currentPosition.getX();
-        double currentPositionY = currentPosition.getY();
-        if (currentPositionX < 0) {
-            currentPositionX = 0;
-        } else if (currentPositionX > GameApp.WINDOW_WIDTH) {
-            currentPositionX = GameApp.WINDOW_WIDTH;
-        }
-        if (currentPositionY < 0) {
-            currentPositionY = 0;
-        } else if (currentPositionY > GameApp.WINDOW_HEIGHT) {
-            currentPositionY = GameApp.WINDOW_HEIGHT;
-        }
-        position = new Point2D(currentPositionX, currentPositionY);
+        double x = getPosition().getX();
+        double y = getPosition().getY();
+
+        if (x < 0) x = 0;
+        else if (x > GameApp.WINDOW_WIDTH) x = GameApp.WINDOW_WIDTH;
+
+        if (y < 0) y = 0;
+        else if (y > GameApp.WINDOW_HEIGHT) y = GameApp.WINDOW_HEIGHT;
+
+        setPosition(new Point2D(x, y));
     }
 
     @Override
     public void onCollision(GameObject otherObject) {
-        if (invincibilityCooldown > 0) return;
-        invincibilityCooldown = invincibilityTime;
+        if (getInvincibilityCooldown() > 0) return;
 
-        switch(otherObject.getClass().getSimpleName()) {
-            case "Asteroid":
-                handleCollisionWithKnockback(otherObject);
+        setInvincibilityCooldown(getInvincibilityTime());
+
+        switch (otherObject.getClass().getSimpleName()) {
+            case "BigAsteroid", "MediumAsteroid", "SmallAsteroid" ->
+                    handleCollisionWithKnockback(otherObject);
         }
     }
 
-    private void attemptShot() {
-        if (shotCooldownTimer == 0) {
-            shotCooldownTimer = shotCooldown;
-            gameObjectCreatorFunction.accept(GameObjectFactory.createFriendlyProjectile(getPosition().subtract(0,getHeight()/2)));
+
+    public void attemptShot() {
+        if (getShotCooldownTimer() == 0) {
+            setShotCooldownTimer(getShotCooldown());
+            getGameObjectCreator().accept(
+                    GameObjectFactory.createFriendlyProjectile(
+                            getPosition().subtract(0, getHeight() / 2)
+                    )
+            );
         }
     }
 
     private void handleMovement(boolean up, boolean down, boolean left, boolean right) {
-        double x = 0;
-        double y = 0;
+        double xVel = 0;
+        double yVel = 0;
+        double speed = getMoveSpeed();
 
-        if (up)    y -= moveSpeed;
-        if (down)  y += moveSpeed;
-        if (left)  x -= moveSpeed;
-        if (right) x += moveSpeed;
+        if (up)    yVel -= speed;
+        if (down)  yVel += speed;
+        if (left)  xVel -= speed;
+        if (right) xVel += speed;
 
-        velocity = new Point2D(x, y);
+        Point2D newVelocity = new Point2D(xVel, yVel);
 
-        if (velocity.magnitude() > 0) {
-            velocity = velocity.normalize().multiply(moveSpeed);
+        if (newVelocity.magnitude() > 0) {
+            newVelocity = newVelocity.normalize().multiply(speed);
         }
-    }
 
+        setVelocity(newVelocity);
+    }
 }

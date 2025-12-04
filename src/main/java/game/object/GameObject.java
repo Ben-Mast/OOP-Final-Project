@@ -11,39 +11,81 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public abstract class GameObject {
-    public static final double DEFAULT_INVINCIBILITY_TIME = .3;
+
+    public static final double DEFAULT_INVINCIBILITY_TIME = 0.3;
     private static final double COLLISION_KNOCKBACK = 2;
 
-    protected double hitRadius;
-    protected double invincibilityTime;
-    protected Point2D position;
-    protected Point2D velocity;
-    protected final Image sprite;
-    protected Consumer<GameObject> gameObjectDestroyer;
+    private double hitRadius;
+    private double invincibilityTime;
+    private Point2D position;
+    private Point2D velocity = Point2D.ZERO;
+    private Image sprite;
+    private Consumer<GameObject> gameObjectDestroyer;
 
-    protected double invincibilityCooldown = 0;
+    private double invincibilityCooldown = 0;
 
     public GameObject(Point2D position, Image sprite) {
+        setPosition(position);
+        setSprite(sprite);
+
+        setHitRadius(sprite.getWidth() / 2 * 0.3);
+        setInvincibilityTime(DEFAULT_INVINCIBILITY_TIME);
+    }
+
+    public Point2D getPosition() {
+        return position;
+    }
+
+    protected void setPosition(Point2D position) {
         this.position = position;
+    }
+
+    public Point2D getVelocity() {
+        return velocity;
+    }
+
+    protected void setVelocity(Point2D velocity) {
+        this.velocity = velocity;
+    }
+
+    public Image getSprite() {
+        return sprite;
+    }
+
+    protected void setSprite(Image sprite) {
         this.sprite = sprite;
-        this.hitRadius = sprite.getWidth() / 2 * 0.3;
-        this.invincibilityTime = DEFAULT_INVINCIBILITY_TIME;
+    }
+
+    public double getHitRadius() {
+        return hitRadius;
+    }
+
+    protected void setHitRadius(double hitRadius) {
+        this.hitRadius = hitRadius;
+    }
+
+    public double getInvincibilityTime() {
+        return invincibilityTime;
+    }
+
+    protected void setInvincibilityTime(double invincibilityTime) {
+        this.invincibilityTime = invincibilityTime;
+    }
+
+    public double getInvincibilityCooldown() {
+        return invincibilityCooldown;
+    }
+
+    protected void setInvincibilityCooldown(double invincibilityCooldown) {
+        this.invincibilityCooldown = invincibilityCooldown;
+    }
+
+    public Consumer<GameObject> getGameObjectDestroyer() {
+        return gameObjectDestroyer;
     }
 
     public void setGameObjectDestroyer(Consumer<GameObject> gameObjectDestroyer) {
         this.gameObjectDestroyer = gameObjectDestroyer;
-    }
-
-    public void onCollision(GameObject otherObject) {
-
-    }
-
-    protected void handleCollisionWithKnockback(GameObject otherObject) {
-        Point2D otherObjectPosition = otherObject.getPosition();
-        Point2D myPosition = getPosition();
-
-        Point2D deflectionVector = myPosition.subtract(otherObjectPosition);
-        position = myPosition.add(deflectionVector.multiply(COLLISION_KNOCKBACK));
     }
 
     public double getWidth() {
@@ -54,49 +96,57 @@ public abstract class GameObject {
         return sprite.getHeight();
     }
 
-    public Point2D getPosition() {
-        return position;
+    public void onCollision(GameObject otherObject) {
+        // default behavior is no-op
     }
 
-    public Point2D getVelocity() {
-        return velocity;
-    }
+    protected void handleCollisionWithKnockback(GameObject otherObject) {
+        Point2D otherPos = otherObject.getPosition();
+        Point2D myPos = getPosition();
 
-    public double getHitRadius() {
-        return hitRadius;
+        Point2D deflection = myPos.subtract(otherPos);
+        setPosition(myPos.add(deflection.multiply(COLLISION_KNOCKBACK)));
     }
 
     public void update(double deltaTime, Set<KeyCode> keys) {
-        invincibilityCooldown -= deltaTime;
-        position = position.add(velocity.multiply(deltaTime));
+
+        setInvincibilityCooldown(getInvincibilityCooldown() - deltaTime);
+
+        setPosition(getPosition().add(getVelocity().multiply(deltaTime)));
+
         checkAndResolveWorldBoundaryCollision();
     }
 
     protected void checkAndResolveWorldBoundaryCollision() {
         Point2D currentPosition = getPosition();
-        double currentPositionX = currentPosition.getX();
-        double currentPositionY = currentPosition.getY();
-        if (currentPositionX < 0 || currentPositionX > GameApp.WINDOW_WIDTH ||  currentPositionY < 0 || currentPositionY > GameApp.WINDOW_HEIGHT) {
-            gameObjectDestroyer.accept(this);
+        double x = currentPosition.getX();
+        double y = currentPosition.getY();
+
+        if (x < 0 || x > GameApp.WINDOW_WIDTH || y < 0 || y > GameApp.WINDOW_HEIGHT) {
+            getGameObjectDestroyer().accept(this);
         }
     }
 
-    public void render(GraphicsContext graphicsContext) {
-        drawSprite(graphicsContext);
-//        drawHitbox(graphicsContext);
+    public void render(GraphicsContext gc) {
+        drawSprite(gc);
+        // drawHitbox(gc);
     }
 
-    private void drawSprite(GraphicsContext graphicsContext) {
-        graphicsContext.drawImage(sprite, position.getX() - sprite.getWidth() / 2, position.getY() - sprite.getHeight() / 2);
+    private void drawSprite(GraphicsContext gc) {
+        gc.drawImage(
+                getSprite(),
+                getPosition().getX() - getWidth() / 2,
+                getPosition().getY() - getHeight() / 2
+        );
     }
 
-    private void drawHitbox(GraphicsContext graphicsContext) {
-        graphicsContext.setFill(Color.RED);
-        graphicsContext.fillOval(
-                position.getX() - hitRadius,
-                position.getY() - hitRadius,
-                hitRadius * 2,
-                hitRadius * 2
+    private void drawHitbox(GraphicsContext gc) {
+        gc.setFill(Color.RED);
+        gc.fillOval(
+                getPosition().getX() - getHitRadius(),
+                getPosition().getY() - getHitRadius(),
+                getHitRadius() * 2,
+                getHitRadius() * 2
         );
     }
 }

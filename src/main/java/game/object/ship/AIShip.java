@@ -1,5 +1,7 @@
 package game.object.ship;
 
+import game.GameApp;
+import game.ResourceManager;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
 import game.strategy.AIMovementStrategy;
@@ -8,29 +10,48 @@ import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
 public class AIShip extends Ship {
     protected static final double DEFAULT_MOVE_SPEED = 50;
     protected static final double DEFAULT_SHOT_COOLDOWN = 1;
-    private static final Image DEFAULT_SPRITE = new Image(Objects.requireNonNull(AIShip.class.getClassLoader().getResourceAsStream("enemy_ship.png")));
+    private static final Image DEFAULT_SPRITE = ResourceManager.getInstance().getEnemyShipSprite();
     private AIMovementStrategy movementStrategy;
 
     public AIShip (Point2D position, Consumer<GameObject> gameObjectCreatorFunction) {
         super(position, DEFAULT_SPRITE, gameObjectCreatorFunction);
-        moveSpeed = DEFAULT_MOVE_SPEED;
-        shotCooldown = DEFAULT_SHOT_COOLDOWN;
-        this.movementStrategy = new DefaultAIMovement(this);
+        setMoveSpeed(DEFAULT_MOVE_SPEED);
+        setShotCooldown(DEFAULT_SHOT_COOLDOWN);
+        setMovementStrategy(new DefaultAIMovement(this));
     }
 
     @Override
     public void update(double deltaTime,  Set<KeyCode> keys) {
-        shotCooldownTimer = shotCooldownTimer > 0 ? shotCooldownTimer - deltaTime : 0;
-        this.velocity = movementStrategy.updateVelocity(deltaTime);
+        if (getShotCooldownTimer() > 0) {
+            setShotCooldownTimer(Math.max(0, getShotCooldownTimer() - deltaTime));
+        }
+        setVelocity(movementStrategy.updateVelocity(deltaTime));
         attemptShot();
         super.update(deltaTime, keys);
+    }
+
+    @Override
+    protected void checkAndResolveWorldBoundaryCollision() {
+        Point2D currentPosition = getPosition();
+        double currentPositionX = currentPosition.getX();
+        double currentPositionY = currentPosition.getY();
+        if (currentPositionX < 0) {
+            currentPositionX = 0;
+        } else if (currentPositionX > GameApp.WINDOW_WIDTH) {
+            currentPositionX = GameApp.WINDOW_WIDTH;
+        }
+        if (currentPositionY < 0) {
+            currentPositionY = 0;
+        } else if (currentPositionY > GameApp.WINDOW_HEIGHT) {
+            getGameObjectDestroyer().accept(this);
+        }
+        setPosition(new Point2D(currentPositionX, currentPositionY));
     }
 
     public void setMovementStrategy(AIMovementStrategy movementStrategy) {
@@ -40,7 +61,7 @@ public class AIShip extends Ship {
     protected void attemptShot() {
         if (shotCooldownTimer == 0) {
             shotCooldownTimer = shotCooldown;
-            gameObjectCreatorFunction.accept(GameObjectFactory.createEnemyProjectile(getPosition().add(0,getHeight()/2)));
+            gameObjectCreator.accept(GameObjectFactory.createEnemyProjectile(getPosition().add(0,getHeight()/2)));
         }
     }
 

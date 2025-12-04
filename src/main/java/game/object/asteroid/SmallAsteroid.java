@@ -1,5 +1,6 @@
 package game.object.asteroid;
 
+import game.ResourceManager;
 import game.object.GameObject;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
@@ -9,7 +10,7 @@ import java.util.function.Consumer;
 
 public class SmallAsteroid extends Asteroid {
     private static final double DEFAULT_SPEED = 100;
-    private static final Image DEFAULT_SPRITE = new Image(Objects.requireNonNull(BigAsteroid.class.getClassLoader().getResourceAsStream("asteroid_small.png")));
+    private static final Image DEFAULT_SPRITE = ResourceManager.getInstance().getAsteroidSpriteSmall();
 
     public SmallAsteroid(Point2D position, Point2D velocity, Consumer<GameObject> gameObjectCreator) {
         super(position, velocity.multiply(DEFAULT_SPEED), DEFAULT_SPRITE, gameObjectCreator);
@@ -21,7 +22,7 @@ public class SmallAsteroid extends Asteroid {
 
         switch (otherObjectType) {
             case "FriendlyProjectile", "EnemyProjectile":
-                gameObjectDestroyer.accept(this);
+                getGameObjectDestroyer().accept(this);
                 break;
         }
     }

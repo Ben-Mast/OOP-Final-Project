@@ -1,5 +1,6 @@
 package game.object.asteroid;
 
+import game.ResourceManager;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
 import javafx.geometry.Point2D;
@@ -11,8 +12,7 @@ import java.util.function.Consumer;
 
 public class MediumAsteroid extends Asteroid {
     private static final double DEFAULT_SPEED = 75;
-    private static final Image DEFAULT_SPRITE = new Image(Objects.requireNonNull(BigAsteroid.class.getClassLoader().getResourceAsStream("asteroid_medium.png")));
-
+    private static final Image DEFAULT_SPRITE = ResourceManager.getInstance().getAsteroidSpriteMedium();
     public MediumAsteroid(Point2D position, Point2D velocity, Consumer<GameObject> gameObjectCreator) {
         super(position, velocity.multiply(DEFAULT_SPEED), DEFAULT_SPRITE, gameObjectCreator);
     }
@@ -27,7 +27,7 @@ public class MediumAsteroid extends Asteroid {
                 for  (GameObject asteroid : asteroidsToCreateOnDestruction) {
                     gameObjectCreator.accept(asteroid);
                 }
-                gameObjectDestroyer.accept(this);
+                getGameObjectDestroyer().accept(this);
                 break;
         }
     }

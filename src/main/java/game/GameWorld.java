@@ -3,6 +3,11 @@ package game;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
 import game.object.ship.PlayerShip;
+import game.object.ship.Ship;
+import game.states.GameState;
+import game.states.PausedGameState;
+import game.states.RunningGameState;
+import game.states.State;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
@@ -12,6 +17,11 @@ import java.util.*;
 
 public class GameWorld {
     private static final Point2D DEFAULT_PLAYER_SPAWN = new Point2D(375, 550);
+
+    private GameState gameState;
+
+    private final GameState runningGameState = new RunningGameState(this);
+    private final GameState pausedGameState = new PausedGameState(this);
 
     private final List<GameObject> gameObjects = new ArrayList<>();
     private final List<GameObject> objectsToAdd = new ArrayList<>();
@@ -27,11 +37,27 @@ public class GameWorld {
 
 
     public GameWorld() {
-        GameObject player = new PlayerShip(DEFAULT_PLAYER_SPAWN, this::createGameObject);
+        Ship player = new PlayerShip(DEFAULT_PLAYER_SPAWN, this::createGameObject);
         createGameObject(player);
+        gameState = runningGameState;
     }
 
-    public void update(double deltaTime, Set<KeyCode> keys) {
+    public void updateGameState(State newState) {
+        gameState = switch (newState) {
+            case RUNNING -> runningGameState;
+            case PAUSED -> pausedGameState;
+        };
+    }
+
+    public void update(double deltaTime, Set<KeyCode> keyCodes) {
+        gameState.update(deltaTime, keyCodes);
+    }
+
+    public void render(GraphicsContext graphicContext) {
+        gameState.render(graphicContext);
+    }
+
+    public void updateWorld(double deltaTime, Set<KeyCode> keys) {
         attemptToSpawnMeteorWave(deltaTime);
         attemptToSpawnAIShipWave(deltaTime);
         for (GameObject gameObject : gameObjects) {
@@ -46,7 +72,7 @@ public class GameWorld {
         objectsToAdd.clear();
     }
 
-    public void render(GraphicsContext graphicsContext) {
+    public void renderWorld(GraphicsContext graphicsContext) {
         graphicsContext.clearRect(0, 0, GameApp.WINDOW_WIDTH, GameApp.WINDOW_HEIGHT);
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillRect(0, 0, GameApp.WINDOW_WIDTH, GameApp.WINDOW_HEIGHT);
