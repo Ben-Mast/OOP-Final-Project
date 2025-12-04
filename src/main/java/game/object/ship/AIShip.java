@@ -4,10 +4,9 @@ import game.GameApp;
 import game.ResourceManager;
 import game.object.GameObject;
 import game.object.GameObjectFactory;
-import game.object.projectile.FriendlyProjectile;
 import game.object.projectile.Projectile;
 import game.strategy.AIMovementStrategy;
-import game.strategy.DefaultAIMovement;
+import game.strategy.AIMovementType;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -20,11 +19,74 @@ public class AIShip extends Ship {
     private static final double DEFAULT_SHOT_COOLDOWN = 1;
     private static final double DEFAULT_HEALTH = 10;
     private static final Image DEFAULT_SPRITE = ResourceManager.getInstance().getEnemyShipSprite();
+    private static final Point2D DEFAULT_SPAWN =  new Point2D((double) GameApp.WINDOW_WIDTH /2,0);
     private AIMovementStrategy movementStrategy;
 
-    public AIShip (Point2D position, Consumer<GameObject> gameObjectCreatorFunction) {
-        super(position, DEFAULT_SPRITE, gameObjectCreatorFunction, DEFAULT_HEALTH, DEFAULT_MOVE_SPEED, DEFAULT_SHOT_COOLDOWN);
-        setMovementStrategy(new DefaultAIMovement(this));
+    private AIShip(Builder builder) {
+        super(
+                builder.position,
+                builder.sprite,
+                builder.gameObjectCreator,
+                builder.health,
+                builder.moveSpeed,
+                builder.shotCooldown
+        );
+    }
+
+    public static Builder getNewBuilder(Consumer<GameObject> gameObjectCreator) {
+        return new Builder(gameObjectCreator);
+    }
+
+    public static class Builder {
+
+        private final Consumer<GameObject> gameObjectCreator;
+
+        private Point2D position = DEFAULT_SPAWN;
+        private Image sprite = DEFAULT_SPRITE;
+        private double health = DEFAULT_HEALTH;
+        private double moveSpeed = DEFAULT_MOVE_SPEED;
+        private double shotCooldown = DEFAULT_SHOT_COOLDOWN;
+        private AIMovementType movementType = AIMovementType.DEFAULT;
+
+        public Builder(Consumer<GameObject> creator) {
+            this.gameObjectCreator = creator;
+        }
+
+        public Builder givePosition(Point2D position) {
+            this.position = position;
+            return this;
+        }
+
+        public Builder giveSprite(Image sprite) {
+            this.sprite = sprite;
+            return this;
+        }
+
+        public Builder giveHealth(double health) {
+            this.health = health;
+            return this;
+        }
+
+        public Builder giveMoveSpeed(double moveSpeed) {
+            this.moveSpeed = moveSpeed;
+            return this;
+        }
+
+        public Builder giveShotCooldown(double shotCooldown) {
+            this.shotCooldown = shotCooldown;
+            return this;
+        }
+
+        public Builder giveMovementStrategy(AIMovementType type) {
+            this.movementType = type;
+            return this;
+        }
+
+        public AIShip build() {
+            AIShip ship = new AIShip(this);
+            ship.movementStrategy = GameObjectFactory.createAIMovementStrategy(movementType, ship);
+            return ship;
+        }
     }
 
     @Override

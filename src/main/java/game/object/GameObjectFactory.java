@@ -5,7 +5,9 @@ import game.object.asteroid.*;
 import game.object.projectile.EnemyProjectile;
 import game.object.projectile.FriendlyProjectile;
 import game.object.ship.AIShip;
+import game.object.ship.Ship;
 import game.strategy.AIMovementStrategy;
+import game.strategy.AIMovementType;
 import game.strategy.DefaultAIMovement;
 import game.strategy.ZigZagAIMovement;
 import javafx.geometry.Point2D;
@@ -14,14 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class GameObjectFactory {
     private static final Random RANDOM = new Random();
-    private static final List<Function<AIShip, AIMovementStrategy>> MOVEMENT_STRATEGIES = List.of(
-            DefaultAIMovement::new,
-            ZigZagAIMovement::new
-    );
 
     public static GameObject createRandomlySpawnedAsteroid(Consumer<GameObject> gameObjectCreator) {
         Point2D spawnPosition = getRandomTopScreenSpawnPosition();
@@ -82,6 +79,13 @@ public class GameObjectFactory {
         return new Point2D(randomX, 0);
     }
 
+    public static AIMovementStrategy createAIMovementStrategy(AIMovementType movementType, Ship ship) {
+        return switch (movementType) {
+            case DEFAULT -> new DefaultAIMovement(ship);
+            case ZIGZAG -> new ZigZagAIMovement(ship);
+        };
+    }
+
     public static GameObject createFriendlyProjectile(Point2D position) {
         return new FriendlyProjectile(position);
     }
@@ -91,9 +95,9 @@ public class GameObjectFactory {
     }
 
     public static GameObject createRandomlySpawnedAIShip(Consumer<GameObject> gameObjectCreatorFunction) {
-        Point2D position = getRandomTopScreenSpawnPosition();
-        AIShip ship = new AIShip(position, gameObjectCreatorFunction);
-        ship.setMovementStrategy(MOVEMENT_STRATEGIES.get(RANDOM.nextInt(MOVEMENT_STRATEGIES.size())).apply(ship));
+        Point2D randomSpawnPoint = getRandomTopScreenSpawnPosition();
+        AIShip ship = AIShip.getNewBuilder(gameObjectCreatorFunction).givePosition(randomSpawnPoint).build();
+        ship.setMovementStrategy(createAIMovementStrategy(AIMovementType.getRandom(),ship));
         return ship;
     }
 
