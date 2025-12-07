@@ -9,6 +9,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.util.*;
 
@@ -33,6 +34,8 @@ public class GameWorld {
     private double shipWaveCooldownTimer = 0;
     private int shipWaveSize = 1;
 
+    private double timeAlive;
+
 
     public GameWorld() {
         reset();
@@ -43,6 +46,7 @@ public class GameWorld {
         Ship player = new PlayerShip(DEFAULT_PLAYER_SPAWN, this::createGameObject);
         createGameObject(player);
         processAddRemoveObjects();
+        timeAlive = 0;
         gameState = runningGameState;
     }
 
@@ -72,6 +76,7 @@ public class GameWorld {
         if (isGameOver()) {
             updateGameState(State.GAMEOVER);
         }
+        timeAlive += deltaTime;
         attemptToSpawnMeteorWave(deltaTime);
         attemptToSpawnAIShipWave(deltaTime);
         for (GameObject gameObject : gameObjects) {
@@ -88,10 +93,20 @@ public class GameWorld {
         objectsToAdd.clear();
     }
 
+    private void renderTimeAlive(GraphicsContext graphicsContext) {
+        double x = 10;
+        double y = 30;
+        graphicsContext.setFill(Color.WHITE);
+        graphicsContext.setFont(new Font(20));
+        graphicsContext.fillText("Time Alive: " + String.format("%.1f", timeAlive), x, y);
+    }
+
     public void renderWorld(GraphicsContext graphicsContext) {
         graphicsContext.clearRect(0, 0, GameApp.WINDOW_WIDTH, GameApp.WINDOW_HEIGHT);
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillRect(0, 0, GameApp.WINDOW_WIDTH, GameApp.WINDOW_HEIGHT);
+
+        renderTimeAlive(graphicsContext);
 
         for (GameObject gameObject : gameObjects) {
             gameObject.render(graphicsContext);
