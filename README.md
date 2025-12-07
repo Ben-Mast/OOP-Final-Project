@@ -39,6 +39,10 @@ The game world uses separate states:
 * **Paused**
 * **Game Over**
 
+### **5. Singleton Pattern — ResourceManager**
+
+A `ResourceManager` singleton ensures that all images, sprites, and shared assets are loaded only once and accessed globally, preventing duplicate loading and reducing memory use.
+
 ---
 
 ## **How to Run**
