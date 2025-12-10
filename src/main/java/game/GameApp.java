@@ -26,7 +26,7 @@ public class GameApp extends Application {
         scene.setOnKeyReleased(e -> keys.remove(e.getCode()));
 
         stage.setScene(scene);
-        stage.setTitle("Asteroid Assault");
+        stage.setTitle("Lunar Breakout");
         stage.show();
 
         GameWorld gameWorld = new GameWorld();
