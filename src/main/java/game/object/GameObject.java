@@ -125,13 +125,13 @@ public abstract class GameObject {
         }
     }
 
-    public void render(GraphicsContext gc) {
-        drawSprite(gc);
+    public void render(GraphicsContext graphicsContext) {
+        drawSprite(graphicsContext);
         // drawHitbox(gc);
     }
 
-    private void drawSprite(GraphicsContext gc) {
-        gc.drawImage(
+    private void drawSprite(GraphicsContext graphicsContext) {
+        graphicsContext.drawImage(
                 getSprite(),
                 getPosition().getX() - getWidth() / 2,
                 getPosition().getY() - getHeight() / 2
